@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Form</title>
+    <style>
+        body {
+            font-size: 14px;
+            font-family: "Moderat", "Inter", sans-serif;
+            font-weight: 400;
+            color: #333;
+        }
+
+        #start-payment-button {
+            cursor: pointer;
+            position: relative;
+            background-color: #ff9b00;
+            color: #12122c;
+            max-width: 30%;
+            padding: 7.5px 16px;
+            font-weight: 500;
+            font-size: 14px;
+            border-radius: 4px;
+            border: none;
+            transition: all .1s ease-in;
+            vertical-align: middle;
+        }
+
+        #start-payment-button {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <form method="POST" action="https://checkout.flutterwave.com/v3/hosted/pay">
+        <div>
+            Your order is NGN <span id="amount">2000</span>
+        </div>
+
+        <input type="hidden" name="public_key" id="publicKey" value="FLWPUBK_TEST-02b9b5fc6406bd4a41c3ff141cc45e93-X" />
+        <input type="hidden" name="customer[email]" id="customerEmail" value="test@mailnator.com" />
+        <input type="hidden" name="customer[name]" id="customerName" value="Ayomide Jimi-Oni" />
+        <input type="hidden" name="tx_ref" id="txRef" value="txref-81123" />
+        <input type="hidden" name="amount" id="orderAmount" value="2000" />
+        <input type="hidden" name="currency" id="orderCurrency" value="NGN" />
+        <input type="hidden" name="redirect_url" value="file://android_asset/payment-callback.html" />
+        <input type="hidden" name="meta[source]" id="metaSource" value="docs-html-test" />
+
+        <br>
+        <button type="submit" id="start-payment-button">Pay Now</button>
+    </form>
+
+    <script type="text/javascript">
+        function sendData(data) {
+            if (!data) {
+                console.error("No data received");
+                return;
+            }
+
+            // Split the received data string
+            var dataArray = data.split(',');
+
+            if (dataArray.length < 4) {
+                console.error("Incomplete data");
+                return;
+            }
+
+            // Access individual elements based on your order
+            var amount = dataArray[0];
+            var email = dataArray[1];
+            var name = dataArray[2];
+            var currency = dataArray[3];
+
+            // Update form fields with received data
+            document.getElementById('amount').innerText = amount;
+            document.getElementById('customerEmail').value = email;
+            document.getElementById('customerName').value = name;
+            document.getElementById('orderAmount').value = amount;
+            document.getElementById('orderCurrency').value = currency;
+        }
+
+        // Example call for sending data from Swift/Native
+        function receiveDataFromSwift(fullName, email, currency, amount) {
+            var dataString = `${amount},${email},${fullName},${currency}`;
+            console.log("Received data from Swift:", dataString);
+            sendData(dataString);
+
+            // After the data is received and populated, simulate a click on the "Pay Now" button
+            document.getElementById('start-payment-button').style.display = "inline-block";
+            document.getElementById('start-payment-button').click();
+        }
+
+        // When the page loads, Swift will send the data
+        window.onload = function () {
+            // You no longer need to hardcode the data here.
+            // Ensure Swift calls receiveDataFromSwift() with the actual data.
+            console.log("Waiting for Swift to send data...");
+        };
+    </script>
+
+</body>
+
+</html>
